@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Login • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="auth-shell reveal">
+  <div class="form-card narrow lift-card">
+    <p class="eyebrow">Account access</p>
+    <h1>Secure login</h1>
+    <p class="muted">Admin login is fixed in this build. Use the admin credentials configured in your .env after running init-db.</p>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Account type
+        <select name="account_type" required>
+          <option value="voter">Voter</option>
+          <option value="admin">Admin</option>
+          <option value="candidate">Candidate</option>
+        </select>
+      </label>
+      <label>ID
+        <input name="public_id" placeholder="VOT123456 / CAN123456 / ADMIN001" required>
+      </label>
+      <label>Password
+        <span class="password-wrap"><input type="password" name="password" required><button type="button" class="password-toggle">Show</button></span>
+      </label>
+      <button class="btn primary full" type="submit">Login securely</button>
+    </form>
+    <div class="mini-links">
+      <a href="{{ url_for('voter.verify') }}">Verify voter OTP</a>
+      <a href="{{ url_for('candidate.verify') }}">Verify candidate OTP</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Verify Candidate • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="auth-shell reveal">
+  <div class="form-card narrow lift-card">
+    <p class="eyebrow">Dual OTP verification</p>
+    <h1>Verify candidate</h1>
+    <p class="muted">Enter both email and mobile OTPs to complete candidate identity verification.</p>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Candidate ID<input name="candidate_id" value="{{ session.get('last_candidate_id', '') }}" required></label>
+      <label>Email OTP<input name="email_otp" minlength="6" maxlength="6" inputmode="numeric" required></label>
+      <label>Mobile OTP<input name="phone_otp" minlength="6" maxlength="6" inputmode="numeric" required></label>
+      <button class="btn primary full" type="submit">Verify both OTPs</button>
+    </form>
+    <form method="post" action="{{ url_for('candidate.resend_otp') }}" class="resend-form stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Resend for ID<input name="candidate_id" value="{{ session.get('last_candidate_id', '') }}" required></label>
+      <button class="btn ghost full" type="submit">Resend email + mobile OTP</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

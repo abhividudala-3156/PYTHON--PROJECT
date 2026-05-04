@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Candidate Registration • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="form-card reveal">
+  <p class="eyebrow">Candidate onboarding</p>
+  <h1>Register candidate</h1>
+  <p class="muted">Candidate appears on ballot only after email OTP, mobile OTP, admin identity approval, and candidate approval.</p>
+  <form method="post" enctype="multipart/form-data" class="grid-form enhanced-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Full name<input name="name" required></label>
+    <label>Email<input type="email" name="email" required></label>
+    <label>Mobile number<input name="phone" pattern="[0-9]{10,15}" required></label>
+    <label>Age<input type="number" name="age" min="18" max="120" required></label>
+    <label>Constituency<input name="constituency" required></label>
+    <label>Party<input name="party" required></label>
+    <label>Symbol<input name="symbol" required></label>
+    <label>Password
+      <span class="password-wrap"><input type="password" name="password" minlength="8" required><button type="button" class="password-toggle">Show</button></span>
+    </label>
+    <label class="span-2">Manifesto<textarea name="manifesto" rows="4"></textarea></label>
+    <label>Profile photo<input type="file" name="photo" accept="image/*"></label>
+    <label>ID proof upload<input type="file" name="proof" accept="image/*,.pdf" required></label>
+    <div class="span-2 security-note">Both OTPs must be verified before admin can approve this candidate.</div>
+    <button class="btn primary span-2" type="submit">Create candidate account</button>
+  </form>
+</section>
+{% endblock %}

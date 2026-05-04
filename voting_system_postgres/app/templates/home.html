@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Home • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="hero grid-2 reveal">
+  <div>
+    <p class="eyebrow">Secure online election portal</p>
+    <h1>Vote with confidence, verify with dual OTP, manage with PostgreSQL.</h1>
+    <p class="hero-copy">A modern voting system with email + mobile verification, encrypted identity proof storage, admin approval, audit logs, transaction-safe voting, and an AI website assistant.</p>
+    <div class="hero-actions">
+      <a class="btn primary large" href="{{ url_for('voter.register') }}">Register as Voter</a>
+      <a class="btn secondary large" href="{{ url_for('candidate.register') }}">Register Candidate</a>
+      <a class="btn soft large" href="{{ url_for('auth.login') }}">Login</a>
+    </div>
+    <div class="trust-row">
+      <span>🔐 Hashed passwords</span><span>📲 Dual OTP</span><span>🧾 Audit trail</span>
+    </div>
+  </div>
+  <div class="hero-card float-card">
+    <div class="shield">🛡️</div>
+    <h2>Security workflow</h2>
+    <ol class="timeline-list">
+      <li><span>1</span>Register with proof upload</li>
+      <li><span>2</span>Verify email and mobile OTP</li>
+      <li><span>3</span>Admin approves identity</li>
+      <li><span>4</span>Vote once during active election</li>
+    </ol>
+  </div>
+</section>
+
+<section class="stats-grid reveal">
+  <div class="stat-card"><span>{{ stats.voters }}</span><label>Registered voters</label></div>
+  <div class="stat-card"><span>{{ stats.candidates }}</span><label>Total candidates</label></div>
+  <div class="stat-card"><span>{{ stats.approved }}</span><label>Approved candidates</label></div>
+  <div class="stat-card"><span>{{ stats.votes }}</span><label>Votes cast</label></div>
+</section>
+
+<section class="feature-grid reveal">
+  <article class="feature-card">
+    <div class="feature-icon">👤</div>
+    <h3>Verified voter flow</h3>
+    <p>Voters need email OTP, mobile OTP, encrypted proof upload, and admin approval before accessing the ballot.</p>
+  </article>
+  <article class="feature-card">
+    <div class="feature-icon">🏛️</div>
+    <h3>Candidate control</h3>
+    <p>Candidates need dual verification and admin approval before their party, symbol, and manifesto appear to voters.</p>
+  </article>
+  <article class="feature-card">
+    <div class="feature-icon">🧠</div>
+    <h3>AI website assistant</h3>
+    <p>The assistant answers questions about setup, login, OTP, admin controls, database configuration, and security.</p>
+  </article>
+  <article class="feature-card">
+    <div class="feature-icon">🗄️</div>
+    <h3>pgAdmin ready</h3>
+    <p>All records are stored in PostgreSQL tables that you can inspect from pgAdmin 4.</p>
+  </article>
+  <article class="feature-card">
+    <div class="feature-icon">📊</div>
+    <h3>Admin exports</h3>
+    <p>Export voters, candidates, votes, and audit logs as CSV reports from the dashboard.</p>
+  </article>
+  <article class="feature-card">
+    <div class="feature-icon">✅</div>
+    <h3>One voter, one vote</h3>
+    <p>Database locking and a unique vote constraint prevent duplicate voting under concurrent requests.</p>
+  </article>
+</section>
+{% endblock %}

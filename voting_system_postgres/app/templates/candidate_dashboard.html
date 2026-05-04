@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Candidate Dashboard • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="dashboard-head reveal">
+  <div>
+    <p class="eyebrow">Candidate portal</p>
+    <h1>{{ candidate.name }}</h1>
+    <p class="muted">{{ candidate.candidate_id }} • {{ candidate.party }} • {{ candidate.constituency }}</p>
+  </div>
+</section>
+
+<section class="stats-grid reveal">
+  <div class="stat-card"><span>{{ candidate.votes }}</span><label>Votes</label></div>
+  <div class="stat-card"><span>{{ candidate.status }}</span><label>Approval status</label></div>
+  <div class="stat-card"><span>{{ candidate.proof_status }}</span><label>Proof status</label></div>
+  <div class="stat-card"><span>{{ '2/2' if candidate.email_verified and candidate.phone_verified else 'Pending' }}</span><label>OTP verification</label></div>
+</section>
+
+<section class="feature-grid reveal">
+  <article class="feature-card"><div class="feature-icon">📧</div><h3>Email OTP</h3><p>{{ 'Verified' if candidate.email_verified else 'Pending verification' }}</p></article>
+  <article class="feature-card"><div class="feature-icon">📲</div><h3>Mobile OTP</h3><p>{{ 'Verified' if candidate.phone_verified else 'Pending verification' }}</p></article>
+  <article class="feature-card"><div class="feature-icon">✅</div><h3>Ballot visibility</h3><p>{{ 'Visible after approval' if candidate.status == 'approved' else 'Waiting for admin approval' }}</p></article>
+</section>
+
+<div class="form-card reveal">
+  <h2>Manifesto</h2>
+  <p>{{ candidate.manifesto or 'No manifesto submitted.' }}</p>
+</div>
+{% endblock %}

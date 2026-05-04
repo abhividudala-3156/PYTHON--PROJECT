@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Vote • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="dashboard-head reveal">
+  <div>
+    <p class="eyebrow">Ballot</p>
+    <h1>Cast your vote</h1>
+    <p class="muted">Constituency: <strong>{{ voter.constituency if voter else '-' }}</strong></p>
+  </div>
+  <div class="status-box {{ 'ok' if estatus.open else 'warn' }}">{{ estatus.message }}</div>
+</section>
+
+<section class="verification-strip reveal">
+  <span class="badge {{ 'approved' if voter.email_verified else 'pending' }}">Email {{ 'verified' if voter.email_verified else 'pending' }}</span>
+  <span class="badge {{ 'approved' if voter.phone_verified else 'pending' }}">Mobile {{ 'verified' if voter.phone_verified else 'pending' }}</span>
+  <span class="badge {{ voter.proof_status }}">Proof {{ voter.proof_status }}</span>
+  <span class="badge {{ 'approved' if not voter.has_voted else 'rejected' }}">{{ 'Ready to vote' if not voter.has_voted else 'Already voted' }}</span>
+</section>
+
+{% if voter.has_voted %}
+  <div class="empty-state reveal">You have already voted. Thank you for participating.</div>
+{% elif not voter.email_verified or not voter.phone_verified %}
+  <div class="empty-state reveal">Email and mobile OTP verification are both required before voting.</div>
+{% elif voter.proof_status != 'approved' %}
+  <div class="empty-state reveal">Your ID proof status is <strong>{{ voter.proof_status }}</strong>. Admin approval is required before voting.</div>
+{% elif not estatus.open %}
+  <div class="empty-state reveal">Voting is unavailable until the election window opens.</div>
+{% else %}
+  <div class="ballot-grid reveal">
+    {% for candidate in candidates %}
+      <article class="candidate-card vote-card">
+        <div class="candidate-symbol">{{ candidate.symbol[:2].upper() }}</div>
+        <div>
+          <h3>{{ candidate.name }}</h3>
+          <p>{{ candidate.party }} • {{ candidate.constituency }}</p>
+          {% if candidate.manifesto %}<p class="manifesto">{{ candidate.manifesto }}</p>{% endif %}
+        </div>
+        <form method="post" class="vote-confirm-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="candidate_db_id" value="{{ candidate.id }}">
+          <label>Confirm your Voter ID to vote
+            <input name="confirm_voter_id" placeholder="{{ current_user.public_id }}" required>
+          </label>
+          <button class="btn primary full" type="submit" onclick="return confirm('Submit vote for {{ candidate.name }}? This cannot be changed.');">Vote securely</button>
+        </form>
+      </article>
+    {% else %}
+      <div class="empty-state">No approved candidates are available in your constituency.</div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

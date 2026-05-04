@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Voter Registration • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="form-card reveal">
+  <p class="eyebrow">Voter onboarding</p>
+  <h1>Register as voter</h1>
+  <p class="muted">Email OTP + mobile OTP are both required. Your ID proof is encrypted before storage and must be approved by admin.</p>
+  <form method="post" enctype="multipart/form-data" class="grid-form enhanced-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Full name<input name="name" required></label>
+    <label>Email<input type="email" name="email" required></label>
+    <label>Mobile number<input name="phone" pattern="[0-9]{10,15}" placeholder="10 to 15 digits" required></label>
+    <label>Age<input type="number" name="age" min="18" max="120" required></label>
+    <label>Constituency<input name="constituency" required></label>
+    <label>Password
+      <span class="password-wrap"><input type="password" name="password" minlength="8" required><button type="button" class="password-toggle">Show</button></span>
+    </label>
+    <label class="span-2">Address<textarea name="address" rows="3" required></textarea></label>
+    <label>Profile photo<input type="file" name="photo" accept="image/*"></label>
+    <label>ID proof upload<input type="file" name="proof" accept="image/*,.pdf" required></label>
+    <div class="span-2 security-note">After submitting, enter both OTPs on the verification page. In development mode, OTPs appear as messages for testing.</div>
+    <button class="btn primary span-2" type="submit">Create voter account</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Results • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="dashboard-head reveal">
+  <div>
+    <p class="eyebrow">Live public board</p>
+    <h1>Election results</h1>
+    <p class="muted">Total votes counted: <strong>{{ total_votes }}</strong></p>
+  </div>
+</section>
+
+{% if hidden %}
+<div class="empty-state reveal">Public results are disabled by admin.</div>
+{% else %}
+<div class="table-card reveal">
+  <table>
+    <thead><tr><th>Candidate</th><th>Party</th><th>Symbol</th><th>Constituency</th><th>Votes</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td><strong>{{ row.name }}</strong><br><span class="muted">{{ row.candidate_id }}</span></td>
+        <td>{{ row.party }}</td>
+        <td>{{ row.symbol }}</td>
+        <td>{{ row.constituency }}</td>
+        <td><span class="vote-pill">{{ row.votes }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-cell">No approved candidates yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

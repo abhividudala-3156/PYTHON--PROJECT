@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard • {{ app_name }}{% endblock %}
+{% block content %}
+<section class="dashboard-head reveal">
+  <div>
+    <p class="eyebrow">Admin command center</p>
+    <h1>Election management</h1>
+    <p class="muted">Approve identities, control timing, export reports, search records, and audit activity.</p>
+  </div>
+  <form method="post" action="{{ url_for('admin.reset_election') }}" class="danger-zone">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="confirmation" placeholder="Type RESET" required>
+    <button class="btn danger" type="submit" onclick="return confirm('Reset all votes?');">Reset Election</button>
+  </form>
+</section>
+
+<section class="stats-grid reveal">
+  <div class="stat-card"><span>{{ stats.voters }}</span><label>Voters</label></div>
+  <div class="stat-card"><span>{{ stats.verified_voters }}</span><label>Dual verified voters</label></div>
+  <div class="stat-card"><span>{{ stats.pending_voters }}</span><label>Pending proofs</label></div>
+  <div class="stat-card"><span>{{ stats.turnout }}%</span><label>Turnout</label></div>
+  <div class="stat-card"><span>{{ stats.candidates }}</span><label>Candidates</label></div>
+  <div class="stat-card"><span>{{ stats.approved_candidates }}</span><label>Approved candidates</label></div>
+  <div class="stat-card"><span>{{ stats.pending_candidates }}</span><label>Pending candidates</label></div>
+  <div class="stat-card"><span>{{ stats.votes }}</span><label>Votes</label></div>
+</section>
+
+<section class="form-card reveal">
+  <h2>Election window</h2>
+  <form method="post" action="{{ url_for('admin.update_settings') }}" class="grid-form compact admin-settings">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="checkbox-line"><input type="checkbox" name="election_enabled" {% if settings.election_enabled == 'true' %}checked{% endif %}> Enable election</label>
+    <label class="checkbox-line"><input type="checkbox" name="public_results_enabled" {% if settings.public_results_enabled != 'false' %}checked{% endif %}> Public results</label>
+    <label>Start time UTC<input type="datetime-local" name="election_start" value="{{ settings.election_start[:16] if settings.election_start else '' }}"></label>
+    <label>End time UTC<input type="datetime-local" name="election_end" value="{{ settings.election_end[:16] if settings.election_end else '' }}"></label>
+    <button class="btn primary" type="submit">Save settings</button>
+  </form>
+</section>
+
+<section class="form-card reveal">
+  <h2>Search and filters</h2>
+  <form method="get" action="{{ url_for('admin.dashboard') }}" class="grid-form compact">
+    <label>Search<input name="q" value="{{ filters.q }}" placeholder="Name, ID, email, phone, constituency"></label>
+    <label>Voter proof
+      <select name="voter_status">
+        {% for value in ['all','pending','approved','rejected'] %}<option value="{{ value }}" {% if filters.voter_status == value %}selected{% endif %}>{{ value.title() }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Candidate status
+      <select name="candidate_status">
+        {% for value in ['all','pending','approved','rejected'] %}<option value="{{ value }}" {% if filters.candidate_status == value %}selected{% endif %}>{{ value.title() }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="btn primary" type="submit">Filter</button>
+  </form>
+</section>
+
+<section class="panel-grid reveal">
+  <div class="table-card">
+    <div class="table-toolbar">
+      <h2>Voters</h2>
+      <div class="actions"><a class="btn ghost" href="{{ url_for('admin.export', kind='voters') }}">Export voters</a><a class="btn ghost" href="{{ url_for('admin.export', kind='votes') }}">Export votes</a></div>
+    </div>
+    <table>
+      <thead><tr><th>Voter</th><th>Contact</th><th>Verification</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for voter in voters %}
+        <tr>
+          <td><strong>{{ voter.name }}</strong><br><span class="muted">{{ voter.voter_id }} • {{ voter.constituency }}</span></td>
+          <td>{{ mask_email(voter.email) }}<br>{{ mask_phone(voter.phone) }}</td>
+          <td>
+            <span class="badge {{ 'approved' if voter.email_verified else 'pending' }}">Email</span>
+            <span class="badge {{ 'approved' if voter.phone_verified else 'pending' }}">Mobile</span>
+          </td>
+          <td><span class="badge {{ voter.proof_status }}">{{ voter.proof_status }}</span><br>{{ 'Voted' if voter.has_voted else 'Not voted' }}</td>
+          <td class="actions">
+            {% if voter.proof_original_name %}<a class="btn tiny ghost" href="{{ url_for('admin.download_proof', account_type='voter', db_id=voter.id) }}">Proof</a>{% endif %}
+            <form method="post" action="{{ url_for('admin.update_voter_status', voter_id=voter.id, status='approved') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn tiny success">Approve</button></form>
+            <form method="post" action="{{ url_for('admin.update_voter_status', voter_id=voter.id, status='rejected') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn tiny danger">Reject</button></form>
+            <form method="post" action="{{ url_for('admin.update_voter_status', voter_id=voter.id, status='pending') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn tiny ghost">Pending</button></form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="empty-cell">No voters found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <h2>Candidates</h2>
+      <a class="btn ghost" href="{{ url_for('admin.export', kind='candidates') }}">Export candidates</a>
+    </div>
+    <table>
+      <thead><tr><th>Candidate</th><th>Party</th><th>Verification</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for candidate in candidates %}
+        <tr>
+          <td><strong>{{ candidate.name }}</strong><br><span class="muted">{{ candidate.candidate_id }} • {{ candidate.constituency }}</span></td>
+          <td>{{ candidate.party }}<br><span class="muted">{{ candidate.symbol }}</span></td>
+          <td>
+            <span class="badge {{ 'approved' if candidate.email_verified else 'pending' }}">Email</span>
+            <span class="badge {{ 'approved' if candidate.phone_verified else 'pending' }}">Mobile</span>
+          </td>
+          <td><span class="badge {{ candidate.status }}">{{ candidate.status }}</span><br>Proof: {{ candidate.proof_status }} • Votes: {{ candidate.votes }}</td>
+          <td class="actions">
+            {% if candidate.proof_original_name %}<a class="btn tiny ghost" href="{{ url_for('admin.download_proof', account_type='candidate', db_id=candidate.id) }}">Proof</a>{% endif %}
+            <form method="post" action="{{ url_for('admin.update_candidate_status', candidate_id=candidate.id, status='approved') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn tiny success">Approve</button></form>
+            <form method="post" action="{{ url_for('admin.update_candidate_status', candidate_id=candidate.id, status='rejected') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn tiny danger">Reject</button></form>
+            <form method="post" action="{{ url_for('admin.update_candidate_status', candidate_id=candidate.id, status='pending') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn tiny ghost">Pending</button></form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="empty-cell">No candidates found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="table-card reveal">
+  <div class="table-toolbar">
+    <h2>Audit log</h2>
+    <a class="btn ghost" href="{{ url_for('admin.export', kind='audit') }}">Export audit CSV</a>
+  </div>
+  <table>
+    <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Details</th></tr></thead>
+    <tbody>
+    {% for log in logs %}
+      <tr><td>{{ log.created_at }}</td><td>{{ log.actor_role }} / {{ log.actor_identifier }}</td><td>{{ log.action }}</td><td>{{ log.details }}</td></tr>
+    {% else %}
+      <tr><td colspan="4" class="empty-cell">No audit records yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
