@@ -1,3 +1,10 @@
+# contributors
+B vishal Reddy (CDS/2025/1209)
+A Uma Maheswara Reddy (CDS/2025/1220)
+V Abhinay Kumar (CDS/2025/1380)
+
+
+
 # SecureVote PostgreSQL Edition
 
 A Flask voting website designed for PostgreSQL and pgAdmin 4 with improved UI/UX, transitions, dual OTP verification, encrypted proof uploads, admin controls, CSV exports, audit logs, and an OpenRouter-powered website assistant.
